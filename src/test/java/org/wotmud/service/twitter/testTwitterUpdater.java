@@ -1,11 +1,17 @@
-import junit.framework.TestCase;
+package org.wotmud.service.twitter;
 
-import java.nio.file.*;
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.*;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import junit.framework.TestCase;
 
 /**
  * @author flash

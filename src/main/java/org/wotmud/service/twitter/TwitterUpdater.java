@@ -1,27 +1,25 @@
+package org.wotmud.service.twitter;
 // To add a new app to Twitter account go to https://apps.twitter.com/
 // Create the app, copy the consumer key, generate the access token
 
-//import java.util.List;
-import java.util.Date;
-import java.io.*;
-//import java.sql.Time;
-//import java.util.ArrayList;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-//import twitter4j.GeoLocation;
-//import twitter4j.Query;
-//import twitter4j.QueryResult;
-//import twitter4j.Status;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.auth.AccessToken;
-//import twitter4j.auth.RequestToken;
-import twitter4j.conf.*;
+import twitter4j.conf.Configuration;
+import twitter4j.conf.ConfigurationBuilder;
 
 public class TwitterUpdater {
 	
