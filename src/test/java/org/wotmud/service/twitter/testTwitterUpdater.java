@@ -4,12 +4,10 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import junit.framework.TestCase;
 
@@ -19,74 +17,125 @@ import junit.framework.TestCase;
  */
 public class testTwitterUpdater extends TestCase {
 
-	public static TwitterUpdater TU;
-	public static String fileName;
-	
-  public void testFindFile() {
+	public final String TWEET_MSG = "unit testing";
+	public final String PATH = "./tmp/";
+	TwitterUpdater twitterUpdater;
+	TwitterListener twitterListener;
 
-	  TU = new TwitterUpdater();
-	  
-	  fileName = TU.FindFile(10000*1000, 5000*1000); // Look for files that are ancient (to not get any hopefully)
-	  
-	  assertTrue(fileName == null || fileName.length() >= 0);
-	  
-	  // If there is no last tweet file time then we couldn't have gotten back a filename
-	  if (TwitterUpdater.latestFileTime == 0)  
-		  assertTrue(fileName == null);
-	  
-	  // If no filename, create one
-	  if (fileName == null) {
-		  BufferedWriter output;
-		  
-	        try {
-	            File file = new File("./tmp/tweet.test");
-	            output = new BufferedWriter(new FileWriter(file));
-	            output.write("unit testing");
-	            if ( output != null ) output.close();
-	        } catch ( IOException e ) {
-	            e.printStackTrace();
-	        }
-	    
-	        // Ok now try again. It should still not show anything if we just created the file! It's not old enough
-	        fileName = TU.FindFile(10*60*1000, 5000*1000);
-	        assertTrue(fileName == null);
-	  }
-	  
-	  // Now we've created a file, let's shorten the time needed
-	  fileName = TU.FindFile(0, 99999); // Look for a file of (almost) any age
-	  
-	  assertTrue(fileName == null || fileName.length() >= 0);
-	  
-	  if (fileName != null)
-	  {
-		  Path path = Paths.get(fileName);
-		
-		  try {
-			  BasicFileAttributes attr = Files.readAttributes(path, BasicFileAttributes.class);
-			  assertTrue( (System.currentTimeMillis() - attr.creationTime().to(TimeUnit.MILLISECONDS)) < 5000); // Should be less than 5 seconds old
-			  Files.delete(Paths.get(fileName)); // Clean up
-		  }
-		  catch(Exception e){
-			  System.out.println(new Date().toString() + ": Exception trying to get file attributes");
-			  // if any error occurs
-			  e.printStackTrace();
-		  }
-	  }
-  }
+	@Before
+	public void setUp() {
+		twitterUpdater = new TwitterUpdater();
+		twitterListener = new TwitterListenerImpl();
 
- public void testDoTweet() {
-	 
-	 TU = new TwitterUpdater();
-	 
-	 assertTrue(TU.doTweet("Hello there", true));
+		createDirectoryIfNotExist(PATH);
 
-	/*
-    LinkedList<Integer> list = new LinkedList();
-    list.add(1);
-    assertTrue(list.size() == 1);
-    assertTrue(list.getFirst().equals(1));
-    assertTrue(list.size() == 2);
-    */
- }
+		createFile(TWEET_MSG, "tweet.test");
+	}
+
+	@After
+	public void cleanUp() {
+		File file = new File(PATH);
+		file.delete();
+
+		file = new File("./tmp_empty/");
+		file.delete();
+	}
+
+	private void createFile(String text, String fileName) {
+		BufferedWriter output;
+
+		try {
+			File file = new File(PATH + fileName);
+			output = new BufferedWriter(new FileWriter(file));
+			output.write(text);
+			if (output != null)
+				output.close();
+			file.deleteOnExit();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void createDirectoryIfNotExist(String path) {
+		File theDir = new File(path);
+
+		// if the directory does not exist, create it
+		if (!theDir.exists()) {
+			System.out.println("creating directory: " + path);
+			boolean result = false;
+
+			try {
+				theDir.mkdir();
+				result = true;
+			} catch (SecurityException se) {
+				se.printStackTrace();
+			}
+			if (result) {
+				System.out.println(path + "directory created");
+			}
+		}
+		theDir.deleteOnExit();
+	}
+
+	@Test
+	public void testSetUp() {
+		// intentionally left empty
+	}
+
+	@Test
+	public void testGetTweetFileList_empty() {
+		String tmpEmpty = "./tmp_empty/";
+		createDirectoryIfNotExist(tmpEmpty);
+
+		File[] files = twitterListener.getTweetFileList(tmpEmpty);
+
+		assertTrue("No files should be found", files == null || files.length == 0);
+
+		assertEquals("last tweet time should not be updated when no files found", 0,
+				twitterListener.getLastTweetTime());
+	}
+
+	@Test
+	public void testGetTweetFileList_positive() {
+
+		File[] files = twitterListener.getTweetFileList(PATH);
+		assertEquals("There should be only one file found", 1, files.length);
+
+	}
+
+	@Test
+	public void testGetMostRecentFileInTimeFrame_too_recent() {
+		File[] files = twitterListener.getTweetFileList(PATH);
+		assertEquals("There should be only one file found", 1, files.length);
+
+		File file = twitterListener.getMostRecentFileInTimeFrame(files, 10 * 60 * 1000, 5000 * 1000);
+		assertNull("Should not show anything. File was just created! It's not old enough", file);
+	}
+
+	@Test
+	public void testGetMostRecentFileInTimeFrame_positive() {
+		File[] files = twitterListener.getTweetFileList("./tmp/");
+		assertEquals("There should be only one file found", 1, files.length);
+
+		// Look for a file of (almost) any age
+		File file = twitterListener.getMostRecentFileInTimeFrame(files, 0, 99999);
+		assertNotNull("One file should be found", file);
+
+	}
+
+	@Test
+	public void testGetTweetFromFile() {
+		String tweet = twitterListener.getMeTweet(PATH, 0, 999999);
+		assertNotNull("Tweet should be found", tweet);
+		assertTrue("The tweet should be " + TWEET_MSG, tweet.equals(TWEET_MSG));
+
+	}
+
+	@Test
+	public void testDoTweet() {
+
+		assertTrue(twitterUpdater.doTweet("Hello there", true));
+
+	}
 
 }
