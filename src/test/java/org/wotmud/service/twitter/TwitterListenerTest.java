@@ -1,35 +1,34 @@
 package org.wotmud.service.twitter;
 
-import java.io.BufferedWriter;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import junit.framework.TestCase;
-
 /**
  * @author flash
  *
  */
-public class testTwitterUpdater extends TestCase {
+
+public class TwitterListenerTest extends TestBase {
 
 	public final String TWEET_MSG = "unit testing";
 	public final String PATH = "./tmp/";
-	TwitterUpdater twitterUpdater;
 	TwitterListener twitterListener;
 
 	@Before
 	public void setUp() {
-		twitterUpdater = new TwitterUpdater();
 		twitterListener = new TwitterListenerImpl();
 
 		createDirectoryIfNotExist(PATH);
 
-		createFile(TWEET_MSG, "tweet.test");
+		createFile(PATH, TWEET_MSG, "tweet.test");
 	}
 
 	@After
@@ -39,43 +38,7 @@ public class testTwitterUpdater extends TestCase {
 
 		file = new File("./tmp_empty/");
 		file.delete();
-		
-	}
 
-	private void createFile(String text, String fileName) {
-		BufferedWriter output;
-
-		try {
-			File file = new File(PATH + fileName);
-			output = new BufferedWriter(new FileWriter(file));
-			output.write(text);
-			if (output != null)
-				output.close();
-			file.deleteOnExit();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	private void createDirectoryIfNotExist(String path) {
-		File theDir = new File(path);
-
-		// if the directory does not exist, create it
-		if (!theDir.exists()) {
-			System.out.println("creating directory: " + path);
-			boolean result = false;
-
-			try {
-				theDir.mkdir();
-				result = true;
-			} catch (SecurityException se) {
-				se.printStackTrace();
-			}
-			if (result) {
-				System.out.println(path + "directory created");
-			}
-		}
-		theDir.deleteOnExit();
 	}
 
 	@Test
@@ -129,13 +92,6 @@ public class testTwitterUpdater extends TestCase {
 		String tweet = twitterListener.getMeTweet(PATH, 0, 999999);
 		assertNotNull("Tweet should be found", tweet);
 		assertTrue("The tweet should be '" + TWEET_MSG + "', but was '" + tweet + "'", tweet.startsWith(TWEET_MSG));
-
-	}
-
-	@Test
-	public void testDoTweet() {
-		boolean isUnitTest = true;
-		assertTrue(twitterUpdater.doTweet("Hello there", isUnitTest));
 
 	}
 
