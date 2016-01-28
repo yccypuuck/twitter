@@ -39,6 +39,7 @@ public class testTwitterUpdater extends TestCase {
 
 		file = new File("./tmp_empty/");
 		file.delete();
+		
 	}
 
 	private void createFile(String text, String fileName) {
@@ -127,14 +128,14 @@ public class testTwitterUpdater extends TestCase {
 	public void testGetTweetFromFile() {
 		String tweet = twitterListener.getMeTweet(PATH, 0, 999999);
 		assertNotNull("Tweet should be found", tweet);
-		assertTrue("The tweet should be " + TWEET_MSG, tweet.equals(TWEET_MSG));
+		assertTrue("The tweet should be '" + TWEET_MSG + "', but was '" + tweet + "'", tweet.startsWith(TWEET_MSG));
 
 	}
 
 	@Test
 	public void testDoTweet() {
-
-		assertTrue(twitterUpdater.doTweet("Hello there", true));
+		boolean isUnitTest = true;
+		assertTrue(twitterUpdater.doTweet("Hello there", isUnitTest));
 
 	}
 

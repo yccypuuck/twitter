@@ -47,9 +47,9 @@ public class TwitterListenerImpl implements TwitterListener{
 		if (files == null || files.length == 0 || start > end) {
 			return null;
 		}
+		File myFile = null;
 		try {
 			long mostRecentTweet = latestFileTime;
-			File myFile = files[0];
 			for (File f : files) {
 				if (f.lastModified() < latestFileTime) {
 					f.deleteOnExit();
@@ -62,7 +62,7 @@ public class TwitterListenerImpl implements TwitterListener{
 				}
 			}
 			
-			if (mostRecentTweet >= lastTweetTime)
+			if (mostRecentTweet > lastTweetTime)
 				return myFile;
 		    
 	      } catch(Exception e){
