@@ -16,26 +16,23 @@ public class TwitterUpdaterTest extends TestBase {
 
 	@Before
 	public void setUp() {
-		twitterUpdater = new TwitterUpdater();
+		twitterUpdater = new TwitterUpdaterConsole();
 	}
 
 	@After
 	public void cleanUp() {
 		twitterUpdater = null;
-		
 	}
 
 	@Test
 	public void testSetUp() {
 		// intentionally left empty
 	}
-	
+
 	@Test
 	public void testDoTweet() {
-		boolean isUnitTest = true;
-		assertTrue(twitterUpdater.doTweet("Hello there", isUnitTest));
-		assertTrue(twitterUpdater.doTweet("Hello there", isUnitTest));
-
+		assertTrue(twitterUpdater.doTweet("Hello there"));
+		assertTrue(twitterUpdater.doTweet("Hello there"));
 	}
 
 }

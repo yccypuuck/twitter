@@ -19,7 +19,7 @@ public class Main {
 
 			String tweet = twitterListener.getTweetFromFile(tweetFile);
 
-			if (twitterUpdater.doTweet(tweet, false)) {
+			if (twitterUpdater.doTweet(tweet)) {
 				twitterListener.setLastTweetTime(System.currentTimeMillis());
 			}
 			twitterListener.sleep();

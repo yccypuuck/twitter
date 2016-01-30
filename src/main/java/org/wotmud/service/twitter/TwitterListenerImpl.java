@@ -52,7 +52,7 @@ public class TwitterListenerImpl implements TwitterListener{
 			long mostRecentTweet = latestFileTime;
 			for (File f : files) {
 				if (f.lastModified() < latestFileTime) {
-					f.deleteOnExit();
+					f.delete();
 					continue;
 				}
 				long fileAge = System.currentTimeMillis() - f.lastModified();
@@ -105,7 +105,7 @@ public class TwitterListenerImpl implements TwitterListener{
     		bufferedReader.close();
         
     		// Delete the tweet file now that we've processed it
-    		file.deleteOnExit();
+    		file.delete();
 
     	}
     	catch(FileNotFoundException ex) {

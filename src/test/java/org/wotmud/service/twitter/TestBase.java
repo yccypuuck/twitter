@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class TestBase {
+
 	protected void createFile(String path, String text, String fileName) {
 		BufferedWriter output;
 
